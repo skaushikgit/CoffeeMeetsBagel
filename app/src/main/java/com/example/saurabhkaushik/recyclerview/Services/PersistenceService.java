@@ -29,7 +29,8 @@ public class PersistenceService {
         teamModelArrayList = new ArrayList<>();
     }
 
-    public void loadAllData() {
+    public int loadAllData() {
+        int result = 0;
         String str = "";
         StringBuilder builder = new StringBuilder();
         InputStream inputStream = context.getResources().openRawResource(R.raw.team);
@@ -51,16 +52,18 @@ public class PersistenceService {
 
             try {
                 JSONArray jsonArray = new JSONArray(String.valueOf(builder));
-                convertJSONToModel(jsonArray);
+                result = convertJSONToModel(jsonArray);
                 Log.i("Saurabh", jsonArray.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
+                result = 0;
             }
 
         }
+        return result;
     }
 
-    private void convertJSONToModel(JSONArray jsonArray){
+    private int convertJSONToModel(JSONArray jsonArray){
         for (int i=0; i<jsonArray.length(); i++) {
             try {
                 JSONObject object = jsonArray.getJSONObject(i);
@@ -74,8 +77,10 @@ public class PersistenceService {
                 teamModelArrayList.add(teamModel);
             } catch (JSONException e) {
                 e.printStackTrace();
+                return 0;
             }
         }
+        return 1;
     }
 
     public ArrayList<TeamModel> getTeamModelArrayList() {

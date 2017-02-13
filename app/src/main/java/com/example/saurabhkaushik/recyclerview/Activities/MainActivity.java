@@ -17,8 +17,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PersistenceService persistenceService = AppInstance.getPersistenceService(this);
-        persistenceService.loadAllData();
+//        PersistenceService persistenceService = AppInstance.getPersistenceService(this);
+//        persistenceService.loadAllData();
         MainFragment mainFragment = new MainFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

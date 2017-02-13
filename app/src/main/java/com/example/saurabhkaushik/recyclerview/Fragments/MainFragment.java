@@ -10,8 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.saurabhkaushik.recyclerview.R;
+import com.example.saurabhkaushik.recyclerview.Services.AppInstance;
+import com.example.saurabhkaushik.recyclerview.Services.PersistenceService;
+import com.example.saurabhkaushik.recyclerview.Views.MyRecyclerView;
 
 
 /**
@@ -23,6 +27,8 @@ import com.example.saurabhkaushik.recyclerview.R;
  * create an instance of this fragment.
  */
 public class MainFragment extends Fragment {
+    PersistenceService service;
+    MyRecyclerView myRecyclerView;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -70,7 +76,9 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.myRecyclerViewId);
+        myRecyclerView = (MyRecyclerView) view.findViewById(R.id.myRecyclerViewId);
+        service = AppInstance.getPersistenceService(getContext());
+        new WorkerTask().execute();
         return view;
     }
 
@@ -113,5 +121,21 @@ public class MainFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    
+    public class WorkerTask extends AsyncTask<Void, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            return service.loadAllData();
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            if (integer == 1) {
+                myRecyclerView.update();
+            } else {
+                Toast.makeText(getContext(), "Error downloading data", Toast.LENGTH_LONG).show();
+            }
+
+        }
+    }
 }
