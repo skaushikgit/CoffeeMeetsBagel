@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.example.saurabhkaushik.recyclerview.Models.TeamModel;
 import com.example.saurabhkaushik.recyclerview.R;
 import com.example.saurabhkaushik.recyclerview.Services.AppInstance;
+import com.example.saurabhkaushik.recyclerview.Services.BitmapWorkerTask;
 import com.example.saurabhkaushik.recyclerview.Services.PersistenceService;
 
 import java.io.IOException;
@@ -102,7 +103,10 @@ public class MyRecyclerView extends RecyclerView{
             holder.tvMember.setText(teamModelArrayList.get(position).getId());
             holder.tvLastName.setText(teamModelArrayList.get(position).getLastName());
             holder.tvTitle.setText(teamModelArrayList.get(position).getTitle());
-            new DowloadImageTask(holder.imageView).execute(teamModelArrayList.get(position).getAvatar());
+            BitmapWorkerTask bitmapWorkerTask = new BitmapWorkerTask(getContext(), holder.imageView);
+            BitmapWorkerTask.AsyncDrawable asyncDrawable = new BitmapWorkerTask.AsyncDrawable(getResources(), null, bitmapWorkerTask);
+            holder.imageView.setImageDrawable(asyncDrawable);
+            bitmapWorkerTask.execute(teamModelArrayList.get(position).getAvatar());
         }
 
         @Override
@@ -111,33 +115,4 @@ public class MyRecyclerView extends RecyclerView{
         }
     }
 
-    private class DowloadImageTask extends AsyncTask<String, Void, Bitmap>{
-        ImageView imageView;
-
-        public DowloadImageTask(ImageView imageView) {
-            this.imageView = imageView;
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            Bitmap myBitmap = null;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
-                myBitmap = BitmapFactory.decodeStream(input);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return myBitmap;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            imageView.setImageBitmap(bitmap);
-        }
-    }
 }
