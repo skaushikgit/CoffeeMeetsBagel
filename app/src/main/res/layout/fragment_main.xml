@@ -7,8 +7,6 @@
    <com.example.saurabhkaushik.recyclerview.Views.MyRecyclerView
        android:id="@+id/myRecyclerViewId"
        android:layout_width="match_parent"
-       android:layout_height="match_parent">
-
-   </com.example.saurabhkaushik.recyclerview.Views.MyRecyclerView>
+       android:layout_height="match_parent"/>
 
 </FrameLayout>

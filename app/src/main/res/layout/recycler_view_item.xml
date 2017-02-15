@@ -1,31 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:id="@+id/cardViewId"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/colorWhite"
+    app:cardCornerRadius="4dp">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/cardViewId"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        app:cardCornerRadius="4dp"
-        app:cardBackgroundColor="@color/colorAccent"
-        android:layout_margin="10dp">
+        android:layout_height="wrap_content"
+        android:padding="10dp">
 
         <ImageView
             android:id="@+id/imageViewId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher" />
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:src="@drawable/ic_launcher"
+            android:paddingRight="5dp"
+            android:layout_alignParentLeft="true"/>
 
         <TextView
-            android:id="@+id/textViewId"
-            android:layout_width="match_parent"
+            android:id="@+id/bioId"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TextView Saurabh" />
+            android:text="bio"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/imageViewId"/>
 
-    </android.support.v7.widget.CardView>
+        <TextView
+            android:id="@+id/firstNameId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="first Name"
+            android:layout_below="@+id/bioId"
+            android:layout_toRightOf="@+id/imageViewId"/>
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/memberId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="id"
+            android:layout_below="@+id/firstNameId"
+            android:layout_toRightOf="@+id/imageViewId"/>
+
+        <TextView
+            android:id="@+id/lastNameId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="last Name"
+            android:layout_below="@+id/memberId"
+            android:layout_toRightOf="@+id/imageViewId"/>
+
+        <TextView
+            android:id="@+id/titleId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:layout_below="@+id/lastNameId"
+            android:layout_toRightOf="@+id/imageViewId"/>
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
+
