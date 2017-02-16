@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,9 +36,11 @@ import java.util.ArrayList;
  */
 
 public class MyRecyclerView extends RecyclerView{
+    LruCache<Integer, Bitmap> mMemoryCache;
     private ArrayList<TeamModel> teamModelArrayList = new ArrayList<>();
     MyRecyclerViewAdapter adapter;
     PersistenceService service;
+    BitmapWorkerTask.AddBitmapToMemoryCache addBitmapToMemoryCacheDelegate;
 
     public MyRecyclerView(Context context) {
         super(context);
@@ -56,12 +59,30 @@ public class MyRecyclerView extends RecyclerView{
 
 
     private void init() {
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        // Use 1/8th of the available memory for this memory cache.
+        final int cacheSize = maxMemory / 8;
+        mMemoryCache = new android.util.LruCache<Integer, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(Integer key, Bitmap bitmap) {
+                // The cache size will be measured in kilobytes rather than
+                // number of items.
+                return bitmap.getByteCount() / 1024;
+            }
+        };
+        addBitmapToMemoryCacheDelegate = new BitmapWorkerTask.AddBitmapToMemoryCache() {
+            @Override
+            public void addBitmapToCache(int key, Bitmap bitmap) {
+                mMemoryCache.put(key, bitmap);
+            }
+        };
         service = AppInstance.getPersistenceService(getContext());
         this.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new MyRecyclerViewAdapter();
         this.setAdapter(adapter);
         update();
     }
+
 
     public void update() {
         teamModelArrayList.clear();
@@ -103,10 +124,18 @@ public class MyRecyclerView extends RecyclerView{
             holder.tvMember.setText(teamModelArrayList.get(position).getId());
             holder.tvLastName.setText(teamModelArrayList.get(position).getLastName());
             holder.tvTitle.setText(teamModelArrayList.get(position).getTitle());
-            BitmapWorkerTask bitmapWorkerTask = new BitmapWorkerTask(getContext(), holder.imageView);
-            BitmapWorkerTask.AsyncDrawable asyncDrawable = new BitmapWorkerTask.AsyncDrawable(getResources(), null, bitmapWorkerTask);
-            holder.imageView.setImageDrawable(asyncDrawable);
-            bitmapWorkerTask.execute(teamModelArrayList.get(position).getAvatar());
+            Bitmap bitmap = getBitmapFromMemCache(position);
+            if (bitmap != null) {
+                holder.imageView.setImageBitmap(bitmap);
+            } else {
+                if (cancelPotentialWorker(holder.imageView, position)) {
+                    final BitmapWorkerTask bitmapWorkerTask = new BitmapWorkerTask(getContext(), holder.imageView, position);
+                    bitmapWorkerTask.setAddBitmapToMemoryCacheDelegate(addBitmapToMemoryCacheDelegate);
+                    final BitmapWorkerTask.AsyncDrawable asyncDrawable = new BitmapWorkerTask.AsyncDrawable(getResources(), null, bitmapWorkerTask);
+                    holder.imageView.setImageDrawable(asyncDrawable);
+                    bitmapWorkerTask.execute(teamModelArrayList.get(position).getAvatar());
+                }
+            }
         }
 
         @Override
@@ -115,4 +144,23 @@ public class MyRecyclerView extends RecyclerView{
         }
     }
 
+    private boolean cancelPotentialWorker(ImageView imageView, int key) {
+        BitmapWorkerTask bitmapWorkerTask = BitmapWorkerTask.getBitmapWorkerTaskFromImageView(imageView);
+        if (bitmapWorkerTask != null) {
+            //If the bitmapWorkerTask.key is not yet set or it differs from the new one
+            if (bitmapWorkerTask.imageKey < 0 || bitmapWorkerTask.imageKey != key){
+                //Cancel previous task
+                bitmapWorkerTask.cancel(true);
+            } else {
+                //The same work is already in progress
+                return false;
+            }
+        }
+        //No task was associated with imageView or no existing task was cancelled
+        return true;
+    }
+
+    private Bitmap getBitmapFromMemCache(int key){
+        return mMemoryCache.get(key);
+    }
 }
